@@ -4,6 +4,7 @@ import com.codahale.metrics.Counting;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.Sampling;
 import com.codahale.metrics.Snapshot;
+import com.zegelin.cassandra.exporter.cli.HarvesterOptions;
 import com.zegelin.jmx.NamedObject;
 import com.zegelin.prometheus.domain.Interval;
 import org.apache.cassandra.metrics.CassandraMetricsRegistry;
@@ -11,7 +12,9 @@ import org.apache.cassandra.metrics.CassandraMetricsRegistry.JmxHistogramMBean;
 import org.apache.cassandra.metrics.CassandraMetricsRegistry.JmxTimerMBean;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -64,14 +67,31 @@ public class CassandraMetricsUtilities {
 
             @Override
             public Stream<Interval> getIntervals() {
-                return Stream.of(
-                        new Interval(Interval.Quantile.P_50, (float) timer.get50thPercentile()),
-                        new Interval(Interval.Quantile.P_75, (float) timer.get75thPercentile()),
-                        new Interval(Interval.Quantile.P_95, (float) timer.get95thPercentile()),
-                        new Interval(Interval.Quantile.P_98, (float) timer.get98thPercentile()),
-                        new Interval(Interval.Quantile.P_99, (float) timer.get99thPercentile()),
-                        new Interval(Interval.Quantile.P_99_9, (float) timer.get999thPercentile())
-                );
+                List<Interval> quantiles = new ArrayList<Interval>();
+                for(String q : HarvesterOptions.quantiles.split(",")) {
+                    switch (q) {
+                        case "50":
+                            System.out.println(HarvesterOptions.quantiles);
+                            quantiles.add(new Interval(Interval.Quantile.P_50, (float) timer.get50thPercentile()));
+                            break;
+                        case "75":
+                            quantiles.add(new Interval(Interval.Quantile.P_75, (float) timer.get75thPercentile()));
+                            break;
+                        case "95":
+                            quantiles.add(new Interval(Interval.Quantile.P_95, (float) timer.get95thPercentile()));
+                            break;
+                        case "98":
+                            quantiles.add(new Interval(Interval.Quantile.P_98, (float) timer.get98thPercentile()));
+                            break;
+                        case "99":
+                            quantiles.add(new Interval(Interval.Quantile.P_99, (float) timer.get99thPercentile()));
+                            break;
+                        case "999":
+                            quantiles.add(new Interval(Interval.Quantile.P_99_9, (float) timer.get999thPercentile()));
+                            break;
+                    }
+                }
+                return quantiles.stream();
             }
         };
     }
@@ -85,14 +105,30 @@ public class CassandraMetricsUtilities {
 
             @Override
             public Stream<Interval> getIntervals() {
-                return Stream.of(
-                        new Interval(Interval.Quantile.P_50, (float) histogram.get50thPercentile()),
-                        new Interval(Interval.Quantile.P_75, (float) histogram.get75thPercentile()),
-                        new Interval(Interval.Quantile.P_95, (float) histogram.get95thPercentile()),
-                        new Interval(Interval.Quantile.P_98, (float) histogram.get98thPercentile()),
-                        new Interval(Interval.Quantile.P_99, (float) histogram.get99thPercentile()),
-                        new Interval(Interval.Quantile.P_99_9, (float) histogram.get999thPercentile())
-                );
+                List<Interval> quantiles = new ArrayList<Interval>();
+                for(String quant : HarvesterOptions.quantiles.split(",")) {
+                    switch (quant) {
+                        case "50":
+                            quantiles.add(new Interval(Interval.Quantile.P_50, (float) histogram.get50thPercentile()));
+                            break;
+                        case "75":
+                            quantiles.add(new Interval(Interval.Quantile.P_75, (float) histogram.get75thPercentile()));
+                            break;
+                        case "95":
+                            quantiles.add(new Interval(Interval.Quantile.P_95, (float) histogram.get95thPercentile()));
+                            break;
+                        case "98":
+                            quantiles.add(new Interval(Interval.Quantile.P_98, (float) histogram.get98thPercentile()));
+                            break;
+                        case "99":
+                            quantiles.add(new Interval(Interval.Quantile.P_99, (float) histogram.get99thPercentile()));
+                            break;
+                        case "999":
+                            quantiles.add(new Interval(Interval.Quantile.P_99_9, (float) histogram.get999thPercentile()));
+                            break;
+                    }
+                }
+                return quantiles.stream();
             }
         };
     }

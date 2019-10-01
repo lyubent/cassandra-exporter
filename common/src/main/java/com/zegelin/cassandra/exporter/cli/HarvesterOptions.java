@@ -133,4 +133,10 @@ public class HarvesterOptions {
 
         excludedKeyspaces.addAll(CASSANDRA_SYSTEM_KEYSPACES);
     }
+
+    @Option(names = "--quantiles",
+            defaultValue = "50,75,95,98,99,999",
+            description = "Quantiles to use for histogram and timer metrics in CSV format: e.g. 50,75,99 will " +
+                          "retrive the 50th, 75 and 99th quantiles ignoring 95, 98 and 999.")
+    public static String quantiles;
 }
